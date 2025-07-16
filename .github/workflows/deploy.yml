@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t titiksinggah:latest .
+
+      - name: Save Docker image to file
+        run: docker save titiksinggah:latest -o titiksinggah.tar
+
+      - name: Create .env file from secrets
+        run: |
+          cat <<EOF > .env
+          IP_GEOLOCATION_URL=${{ secrets.IP_GEOLOCATION_URL }}
+          EOF
+
+      - name: Prepare deploy files
+        run: |
+          mkdir titiksinggah
+          mv titiksinggah.tar .env docker-compose.yml titiksinggah/
+
+      - name: Copy Docker image and .env to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "titiksinggah/*"
+          target: "~/"
+
+      - name: Deploy on remote server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/titiksinggah
+
+            docker-compose down || true
+            docker rmi titiksinggah:latest || true
+            
+            docker load -i titiksinggah.tar
+            rm titiksinggah.tar
+            
+            docker-compose up -d
