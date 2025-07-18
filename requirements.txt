@@ -3,3 +3,4 @@ Flask-RESTful
 gunicorn
 pydantic
 pydantic_settings
+flask-cors
