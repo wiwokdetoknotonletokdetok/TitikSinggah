@@ -14,7 +14,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(location_from_ip)
     })
-        .bind(("0.0.0.0", 8000))?
+        .bind(("0.0.0.0", 5000))?
         .run()
         .await
 }

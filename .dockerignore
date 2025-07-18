@@ -1,0 +1,22 @@
+# Ignored by Docker during build context copy
+
+# Binaries and build artifacts
+/target
+
+# Git files
+.git
+.gitignore
+
+# Local tooling config
+/.vscode
+/.idea
+
+# OS & editor junk
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# Env & secrets
+.env
+.env.*
