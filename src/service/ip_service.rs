@@ -1,8 +1,8 @@
 use crate::dto::location_data::{ApiResponse, LocationData};
 use crate::error::IPLocationError;
-use reqwest;
-use std::env;
 use actix_web::HttpRequest;
+use reqwest::Client;
+use std::env;
 
 pub async fn get_client_ip(req: &HttpRequest) -> Option<String> {
     if let Some(forwarded) = req.headers().get("X-Forwarded-For") {
@@ -15,12 +15,12 @@ pub async fn get_client_ip(req: &HttpRequest) -> Option<String> {
     req.peer_addr().map(|addr| addr.ip().to_string())
 }
 
-pub async fn get_ip_location(ip_address: &str) -> Result<LocationData, IPLocationError> {
+pub async fn get_ip_location(client: &Client, ip_address: &str) -> Result<LocationData, IPLocationError> {
     let ip_geolocation_url = env::var("IP_GEOLOCATION_URL")
         .map_err(|_| IPLocationError::ServiceError("IP_GEOLOCATION_URL env variable not set".to_string()))?;
     let url = format!("{}/{}", ip_geolocation_url, ip_address);
 
-    let resp = reqwest::get(&url)
+    let resp = client.get(&url).send()
         .await
         .map_err(|e| IPLocationError::ServiceError(e.to_string()))?;
 
