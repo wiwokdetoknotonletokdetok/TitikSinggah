@@ -23,6 +23,8 @@ jobs:
         run: |
           cat <<EOF > .env
           IP_GEOLOCATION_URL=${{ secrets.IP_GEOLOCATION_URL }}
+          CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+          CORS_ALLOWED_HEADERS=${{ secrets.CORS_ALLOWED_HEADERS }}
           EOF
 
       - name: Prepare deploy files
